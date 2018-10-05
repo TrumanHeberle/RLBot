@@ -8,6 +8,7 @@ from rlbot.utils.structures.legacy_data_v3 import convert_to_legacy_v3
 from rlbot.utils.structures.quick_chats import QuickChats
 from rlbot.utils import game_state_util
 from rlbot.utils.rendering.rendering_manager import RenderingManager
+from rlbot.ai.context import Context # not original
 
 BOT_CONFIG_LOADOUT_HEADER = 'Bot Loadout'
 BOT_CONFIG_LOADOUT_ORANGE_HEADER = 'Bot Loadout Orange'
@@ -59,6 +60,7 @@ class BaseAgent:
         self.team = team
         self.index = index
         self.logger = get_logger('nameless_bot')
+        self.context = Context(self)
 
     def get_output(self, game_tick_packet: GameTickPacket) -> SimpleControllerState:
         """
