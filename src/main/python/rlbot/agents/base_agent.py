@@ -60,7 +60,7 @@ class BaseAgent:
         self.team = team
         self.index = index
         self.logger = get_logger('nameless_bot')
-        self.context = Context(self)
+        self.context = Context(self) # not original
 
     def get_output(self, game_tick_packet: GameTickPacket) -> SimpleControllerState:
         """
