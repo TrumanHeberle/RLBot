@@ -1,3 +1,0 @@
-[framerate]
-spa = 250     # time spent executing an action (milliseconds)
-lag = 0.25    # acceptable lag per action (percent)
