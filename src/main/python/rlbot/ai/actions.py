@@ -1,7 +1,7 @@
 class Action:
     def __init__(self, names, keys):
-        self.names = names
-        self.keys = keys
+        self.names = names          # names given to the action
+        self.keys = keys            # keys responsible for performing the action
         self.w = "W" in keys
         self.a = "A" in keys
         self.s = "S" in keys
@@ -19,8 +19,8 @@ class Action:
         state.boost = self.ml
         state.handbrake = self.shift
 
-# list of all actions possible
-ACTIONS = [
+# list of all core actions possible
+CORE_ACTIONS = [
     Action(["Boost Pitch Down and Yaw Left","Boost Turn Left"],["W","A","ML"]),
     Action(["Boost Pitch Down and Roll Left"],["W","A","SHIFT","ML"]),
     Action(["Pitch Down and Roll Left","Drift Left"],["W","A","SHIFT"]),
@@ -59,5 +59,5 @@ ACTIONS = [
     Action(["Boost Right Jump"],["D","ML","MR"]),
     Action(["Jump"],["MR"]),
     Action(["Boost"],["ML"]),
-    Action(["Boost Jump"],["ML","MR"]),
+    Action(["Boost Jump"],["ML","MR"])
 ]
