@@ -18,6 +18,12 @@ class Action:
         state.jump = self.mr
         state.boost = self.ml
         state.handbrake = self.shift
+    def __str__(self):
+        string = "Action(" + self.names[0]
+        for i in range(1, len(self.names)):
+            string += " or " + self.names[i]
+        string += ")"
+        return string
 
 # list of all core actions possible
 CORE_ACTIONS = [

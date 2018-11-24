@@ -16,6 +16,10 @@ class AIBot(BaseAgent):
         self.train_delay = random.randint(0, SETTINGS.TRAINING_FRAME_DELAY)
         self.context.set_profile(PROFILES["KICKOFF"])
 
+    def retire(self):
+        self.context.save(True)
+        self.context.shutdown()
+
     def evaluate_last(self, packet):
         if (self.last_valid):
             assert self.decision != None
@@ -37,6 +41,7 @@ class AIBot(BaseAgent):
             return self.controller_state
         if (packet.game_info.seconds_elapsed == self.last_game_time):
             # invalid frame, paused
+            self.context.save(False)
             self.last_valid = False
             self.last_time = time.time()
             return self.controller_state
@@ -44,8 +49,14 @@ class AIBot(BaseAgent):
         self.decision = self.context.make_decision(packet)
         if (not packet.game_info.is_round_active):
             # invalid frame, inactive
+            self.context.save(False)
             self.last_valid = False
             self.last_flush = True
+        elif (packet.game_cars[self.index].is_demolished):
+            # invalid frame, demolished
+            self.context.save(False)
+            self.last_valid = False
+            self.last_flush = False
         elif (time.time() - self.last_time > 1/SETTINGS.DECISIONS_PER_SECOND + SETTINGS.ACCEPTABLE_LAG):
             # invalid frame, lag
             self.last_valid = False
