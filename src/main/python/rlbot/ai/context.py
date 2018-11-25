@@ -9,7 +9,7 @@ class Context:
     def __init__(self, agent):
         self.agent = agent
         self.raw_memory = Memory(SETTINGS.MAX_STORAGE_SIZE, normalize=False)
-        self.select_memory = Memory(SETTINGS.MAX_TRAINING_SIZE, normalize=True)
+        self.select_memory = Memory(SETTINGS.MAX_TRAINING_SIZE, normalize=True, keep_bounds=True)
         self.model = None
         self.profile = DEFAULT_PROFILE
         self.last_saved = None
@@ -53,11 +53,17 @@ class Context:
             # ensure the data can be evaluated correctly
             copy_packet = copy.deepcopy(result)
             assert decision[1] != None
-            self.raw_memory.push([decision[0], decision[1], self.profile.get_evaluation(decision[0], copy_packet)])
+            evaluation = self.profile.get_evaluation(decision[0], copy_packet)
+            self.raw_memory.push([decision[0], decision[1], evaluation])
+            self.model.record_evaluation(evaluation)
             if (self.profile.get_finished(decision[0], copy_packet)):
                 # finished an attempt, delay before retrying
+                self.model.record_achievement(1)
                 self.form_training_set(True)
                 self.profile.delay()
+            else:
+                # didn't finish attempt
+                self.model.record_achievement(0)
 
     def form_training_set(self, flush: bool):
         # check if memory should be flushed naturally
@@ -66,21 +72,18 @@ class Context:
         if (flush):
             # check if trainable data is storable
             trainable_data = self.raw_memory.flush()
-            if (trainable_data != None and math.floor(len(trainable_data)*SETTINGS.PERCENTILE_RANGES) > 0):
-                # store training data
-                assert len(trainable_data) > 0
-                trainable_data.sort(key=lambda x: x[2])
-                num = math.floor(len(trainable_data)*SETTINGS.PERCENTILE_RANGES)
-                for i in range(num):
-                    self.select_memory.push(trainable_data[i])
-                    self.select_memory.push(trainable_data[-(i+1)])
+            if (trainable_data != None):
+                for data in trainable_data:
+                    self.select_memory.push(data)
 
     def train(self):
-        if (self.select_memory.size() >= 2 * SETTINGS.PARTITION_SIZE):
-            mem = self.select_memory.get_memory()
-            training = mem[:-SETTINGS.PARTITION_SIZE]
-            testing = mem[-SETTINGS.PARTITION_SIZE:]
-            partitions = math.floor(len(training)/SETTINGS.PARTITION_SIZE)
-            for i in range(partitions):
-                self.model.train(random.sample(training, SETTINGS.PARTITION_SIZE))
+        if (self.select_memory.is_full()):
+            mem = self.select_memory.flush()
+            testing = mem[:SETTINGS.TESTING_SIZE]
+            training = mem[SETTINGS.TESTING_SIZE:]
+            training.sort(key=lambda x: x[2])
+            condensed = [train for train in training if train[2] <= SETTINGS.PERCENTILE_RANGES or train[2] >= 1-SETTINGS.PERCENTILE_RANGES]
+            self.model.train(condensed)
             self.model.test(testing)
+        else:
+            print(self.select_memory.size() / SETTINGS.MAX_TRAINING_SIZE)

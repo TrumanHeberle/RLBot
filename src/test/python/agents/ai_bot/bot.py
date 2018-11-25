@@ -14,7 +14,7 @@ class AIBot(BaseAgent):
         self.last_game_time = -1
         self.decision = None
         self.train_delay = random.randint(0, SETTINGS.TRAINING_FRAME_DELAY)
-        self.context.set_profile(PROFILES["KICKOFF"])
+        self.context.set_profile(PROFILES[SETTINGS.ACTIVE_PROFILE.upper()])
 
     def retire(self):
         self.context.save(True)

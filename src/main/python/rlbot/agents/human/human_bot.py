@@ -1,5 +1,5 @@
 from rlbot.agents.base_agent import BaseAgent
-from controller_input import controller
+from rlbot.agents.human.controller_input import controller
 
 
 class Agent(BaseAgent):

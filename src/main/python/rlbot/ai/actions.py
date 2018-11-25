@@ -13,8 +13,8 @@ class Action:
         state.throttle = self.w - self.s
         state.steer = self.d - self.a
         state.pitch = self.s - self.w
-        state.yaw = (self.a - self.d) * (not self.shift)
-        state.roll = (self.a - self.d) * (self.shift)
+        state.yaw = -(self.a - self.d) * (not self.shift)
+        state.roll = -(self.a - self.d) * (self.shift)
         state.jump = self.mr
         state.boost = self.ml
         state.handbrake = self.shift
